@@ -89,7 +89,7 @@ def calculate_basic_math(expression):
 
 async def broadcast(message):
     if clients:
-        await asyncio.wait([client.send(message) for client in clients])
+        await asyncio.gather(*(client.send(message) for client in clients))
 
 start_server = websockets.serve(handle_client, "127.0.0.1", 5555)
 
