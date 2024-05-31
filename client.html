@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Math Operations Client</title>
+    <script>
+        let socket;
+
+        function connect() {
+            socket = new WebSocket('ws://127.0.0.1:5555');
+
+            socket.onopen = function() {
+                console.log('Connected to the server.');
+                document.getElementById('status').textContent = 'Connected';
+            };
+
+            socket.onmessage = function(event) {
+                const message = event.data;
+                const messagesDiv = document.getElementById('messages');
+                const messageElem = document.createElement('div');
+                messageElem.textContent = message;
+                messagesDiv.appendChild(messageElem);
+            };
+
+            socket.onclose = function() {
+                console.log('Disconnected from the server.');
+                document.getElementById('status').textContent = 'Disconnected';
+            };
+
+            socket.onerror = function(error) {
+                console.error('WebSocket Error: ' + error);
+                document.getElementById('status').textContent = 'Error';
+            };
+        }
+
+        function sendMessage() {
+            const choice = document.getElementById('menuChoice').value;
+            let message;
+
+            if (choice == '3') {
+                const trigFunction = document.getElementById('trigFunction').value;
+                const angle = document.getElementById('angle').value;
+                message = `${choice}:${trigFunction},${angle}`;
+            } else {
+                const expression = document.getElementById('expression').value;
+                message = `${choice}:${expression}`;
+            }
+
+            socket.send(message);
+        }
+
+        function updateUI() {
+            const choice = document.getElementById('menuChoice').value;
+            if (choice == '3') {
+                document.getElementById('trigInputs').style.display = 'block';
+                document.getElementById('expressionInput').style.display = 'none';
+            } else {
+                document.getElementById('trigInputs').style.display = 'none';
+                document.getElementById('expressionInput').style.display = 'block';
+            }
+        }
+
+        window.onload = connect;
+    </script>
+</head>
+<body>
+    <h1>Math Operations</h1>
+    <p id="status">Connecting...</p>
+    <div>
+        <label for="menuChoice">Choose an option:</label>
+        <select id="menuChoice" onchange="updateUI()">
+            <option value="1">Derivative</option>
+            <option value="2">Integral</option>
+            <option value="3">Trigonometric Function</option>
+            <option value="4">Basic Math Operation</option>
+        </select>
+    </div>
+    <div id="trigInputs" style="display:none;">
+        <label for="trigFunction">Function (sin, cos, tan, cot, sec, cosec):</label>
+        <input type="text" id="trigFunction">
+        <label for="angle">Angle (in degrees):</label>
+        <input type="number" id="angle">
+    </div>
+    <div id="expressionInput">
+        <label for="expression">Expression:</label>
+        <input type="text" id="expression">
+    </div>
+    <button onclick="sendMessage()">Send</button>
+    <h2>Messages:</h2>
+    <div id="messages" style="border: 1px solid black; height: 200px; overflow-y: scroll;"></div>
+</body>
+</html>
