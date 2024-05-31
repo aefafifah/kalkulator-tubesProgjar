@@ -1,22 +1,18 @@
-import socket
-import threading
+import asyncio
+import websockets
 import sympy as sp
 import math
 
-def handle_client(client_socket, client_address):
-    print(f"[NEW CONNECTION] {client_address} connected.")
+clients = set()
 
-    while True:
-        try:
-            # Receive data from the client
-            data = client_socket.recv(1024).decode("utf-8")
-            if not data:
-                break
-
-            print(f"[{client_address}] {data}")
+async def handle_client(websocket, path):
+    clients.add(websocket)
+    try:
+        async for message in websocket:
+            print(f"Received message: {message}")
 
             # Split data to get the menu choice and the expression
-            menu_choice, expression = data.split(":")
+            menu_choice, expression = message.split(":")
             menu_choice = int(menu_choice)
 
             # Calculate the result based on the menu choice
@@ -32,45 +28,38 @@ def handle_client(client_socket, client_address):
                 result = "Invalid menu choice"
 
             # Send the calculation result to all connected clients
-            broadcast(f"Hasil dari {expression}: {result}")
+            await broadcast(f"Hasil dari {expression}: {result}")
 
-        except Exception as e:
-            print(f"[ERROR] {e}")
-            break
+    except Exception as e:
+        print(f"Error: {e}")
 
-    print(f"[DISCONNECTED] {client_address}")
-    client_socket.close()
+    finally:
+        clients.remove(websocket)
 
 def calculate_derivative(expression):
     try:
         x = sp.symbols('x')
-        # Convert the mathematical expression into a SymPy expression
         expr = sp.sympify(expression)
-        # Calculate the derivative of the expression
         derivative = sp.diff(expr, x)
-        return derivative
+        return str(derivative)
     except Exception as e:
         return f"Error: {e}"
 
 def calculate_integral(expression):
     try:
         x = sp.symbols('x')
-        # Convert the mathematical expression into a SymPy expression
         expr = sp.sympify(expression)
-        # Calculate the integral of the expression
         integral = sp.integrate(expr, x)
-        return integral
+        return str(integral)
     except Exception as e:
         return f"Error: {e}"
 
 def calculate_trigonometric(expression):
     try:
-        # Split the expression to get the trigonometric function and the angle
         trig_function, angle = expression.split(",")
         angle = float(angle)
-        # Calculate the trigonometric value
         result = trigonometric_function(trig_function, angle)
-        return result
+        return str(result)
     except Exception as e:
         return f"Error: {e}"
 
@@ -93,25 +82,16 @@ def trigonometric_function(trig_function, angle):
 
 def calculate_basic_math(expression):
     try:
-        # Evaluate the basic mathematical expression
         result = eval(expression)
-        return result
+        return str(result)
     except Exception as e:
         return f"Error: {e}"
 
-def broadcast(message):
-    for client_socket in clients:
-        client_socket.send(message.encode("utf-8"))
+async def broadcast(message):
+    if clients:
+        await asyncio.wait([client.send(message) for client in clients])
 
-server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server.bind(("127.0.0.1", 5555))
-server.listen(5)
-print("[LISTENING] Server is listening for connections...")
+start_server = websockets.serve(handle_client, "127.0.0.1", 5555)
 
-clients = []
-
-while True:
-    client_socket, client_address = server.accept()
-    clients.append(client_socket)
-    client_thread = threading.Thread(target=handle_client, args=(client_socket, client_address))
-    client_thread.start()
+asyncio.get_event_loop().run_until_complete(start_server)
+asyncio.get_event_loop().run_forever()
