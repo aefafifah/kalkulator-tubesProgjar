@@ -41,7 +41,9 @@ def calculate_derivative(expression):
         x = sp.symbols('x')
         expr = sp.sympify(expression)
         derivative = sp.diff(expr, x)
-        return str(derivative)
+        derivatives = [derivative] + [sp.diff(derivative, x, n) for n in range(1, 5)]
+        results = [f"{n}th Derivative: {der}" for n, der in enumerate(derivatives)]
+        return "\n".join(results)
     except Exception as e:
         return f"Error: {e}"
 
@@ -50,7 +52,9 @@ def calculate_integral(expression):
         x = sp.symbols('x')
         expr = sp.sympify(expression)
         integral = sp.integrate(expr, x)
-        return str(integral)
+        integrals = [integral] + [sp.integrate(integral, x) for _ in range(1, 5)]
+        results = [f"{n}th Integral: {integral}" for n, integral in enumerate(integrals)]
+        return "\n".join(results)
     except Exception as e:
         return f"Error: {e}"
 
