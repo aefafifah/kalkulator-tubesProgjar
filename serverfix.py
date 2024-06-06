@@ -105,7 +105,7 @@ async def broadcast(message):
     if clients:
         await asyncio.gather(*(client.send(message) for client in clients))
 
-start_server = websockets.serve(handle_client, "https://showcase.ittsby.id/IF24-Progjar/kelompok2/", 11002)
+start_server = websockets.serve(handle_client, "127.0.0.1", 11002)
 
 asyncio.get_event_loop().run_until_complete(start_server)
 asyncio.get_event_loop().run_forever()
