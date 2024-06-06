@@ -15,6 +15,7 @@ async def handle_client(websocket, path):
 
             if message.startswith("Broadcasting:"):
                 broadcasting = message.split(":")[1].strip() == "1"
+                print(f"Broadcasting set to: {broadcasting}")
                 continue
 
             menu_choice, expression = message.split(":")

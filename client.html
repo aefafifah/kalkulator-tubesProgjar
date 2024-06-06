@@ -187,16 +187,12 @@
         const isChecked = document.getElementById(
           "flexSwitchCheckChecked"
         ).checked;
-        const value = isChecked ? 1 : 0;
-        if (value === 1) {
-          document.body.style.backgroundColor = "#DAD3BE";
-        } else {
-          document.body.style.backgroundColor = "#f4f4f9";
-        }
-        console.log("Broadcasting:", value);
+        document.body.style.backgroundColor = isChecked ? "red" : "#f4f4f9";
+        const broadcastValue = isChecked ? "1" : "0";
+        socket.send(`Broadcasting:${broadcastValue}`);
       }
 
-      window.onload = function () {
+      window.onload = () => {
         connect();
         document
           .getElementById("flexSwitchCheckChecked")
@@ -259,7 +255,6 @@
         <input type="text" id="expression" />
       </div>
       <button onclick="sendMessage()">Send</button>
-      <h2>Messages:</h2>
       <div id="messages"></div>
     </div>
   </body>
