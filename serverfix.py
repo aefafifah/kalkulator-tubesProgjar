@@ -17,13 +17,25 @@ async def handle_client(websocket, path):
 
             # Calculate the result based on the menu choice
             if menu_choice == 1:
-                result = calculate_derivative(expression)
+                result = calculate_derivative(expression, 1)
             elif menu_choice == 2:
-                result = calculate_integral(expression)
+                result = calculate_integral(expression, 1)
             elif menu_choice == 3:
                 result = calculate_trigonometric(expression)
             elif menu_choice == 4:
                 result = calculate_basic_math(expression)
+            elif menu_choice == 5:
+                result = calculate_derivative(expression, 2)
+            elif menu_choice == 6:
+                result = calculate_derivative(expression, 3)
+            elif menu_choice == 7:
+                result = calculate_derivative(expression, 4)
+            elif menu_choice == 8:
+                result = calculate_integral(expression, 2)
+            elif menu_choice == 9:
+                result = calculate_integral(expression, 3)
+            elif menu_choice == 10:
+                result = calculate_integral(expression, 4)
             else:
                 result = "Invalid menu choice"
 
@@ -36,25 +48,23 @@ async def handle_client(websocket, path):
     finally:
         clients.remove(websocket)
 
-def calculate_derivative(expression):
+def calculate_derivative(expression, order):
     try:
         x = sp.symbols('x')
         expr = sp.sympify(expression)
-        derivative = sp.diff(expr, x)
-        derivatives = [derivative] + [sp.diff(derivative, x, n) for n in range(1, 5)]
-        results = [f"{n}th Derivative: {der}" for n, der in enumerate(derivatives)]
-        return "\n".join(results)
+        derivative = sp.diff(expr, x, order)
+        return str(derivative)
     except Exception as e:
         return f"Error: {e}"
 
-def calculate_integral(expression):
+def calculate_integral(expression, order):
     try:
         x = sp.symbols('x')
         expr = sp.sympify(expression)
-        integral = sp.integrate(expr, x)
-        integrals = [integral] + [sp.integrate(integral, x) for _ in range(1, 5)]
-        results = [f"{n}th Integral: {integral}" for n, integral in enumerate(integrals)]
-        return "\n".join(results)
+        integral = expr
+        for _ in range(order):
+            integral = sp.integrate(integral, x)
+        return str(integral)
     except Exception as e:
         return f"Error: {e}"
 
