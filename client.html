@@ -96,7 +96,9 @@
       let socket;
 
       function connect() {
-        socket = new WebSocket("ws://127.0.0.1:5555");
+        socket = new WebSocket(
+          "https://showcase.ittsby.id/IF24-Progjar/kelompok2/:11002"
+        );
 
         socket.onopen = function () {
           console.log("Connected to the server.");
