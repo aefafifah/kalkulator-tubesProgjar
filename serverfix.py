@@ -4,18 +4,22 @@ import sympy as sp
 import math
 
 clients = set()
+broadcasting = False
 
 async def handle_client(websocket, path):
+    global broadcasting
     clients.add(websocket)
     try:
         async for message in websocket:
             print(f"Received message: {message}")
 
-            # Split data to get the menu choice and the expression
+            if message.startswith("Broadcasting:"):
+                broadcasting = message.split(":")[1].strip() == "1"
+                continue
+
             menu_choice, expression = message.split(":")
             menu_choice = int(menu_choice)
 
-            # Calculate the result based on the menu choice
             if menu_choice == 1:
                 result = calculate_derivative(expression, 1)
             elif menu_choice == 2:
@@ -39,8 +43,11 @@ async def handle_client(websocket, path):
             else:
                 result = "Invalid menu choice"
 
-            # Send the calculation result to all connected clients
-            await broadcast(f"Hasil dari {expression}: {result}")
+            message_to_send = f"Hasil dari {expression}: {result}"
+            if broadcasting:
+                await broadcast(message_to_send)
+            else:
+                await websocket.send(message_to_send)
 
     except Exception as e:
         print(f"Error: {e}")
