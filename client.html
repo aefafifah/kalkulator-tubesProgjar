@@ -131,10 +131,10 @@
             'input[name="trigFunction"]:checked'
           ).value;
           const angle = document.getElementById("angle").value;
-          message = ${choice}:${trigFunction},${angle};
+          message = `${choice}:${trigFunction},${angle}`;
         } else {
           const expression = document.getElementById("expression").value;
-          message = ${choice}:${expression};
+          message = `${choice}:${expression}`;
           document.getElementById("expression").value = "";
         }
 
